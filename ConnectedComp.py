@@ -92,6 +92,40 @@ def selection(image, thr=70):      #selection of connected components with pixel
     return bigareasindex, bigareas, bigareasarray
 
 
+def differentSelection(image, thr=70, number=1):      #selection of connected components with pixel area > certain value (valuemean) +/- number times standard deviation
+    img = cv.threshold(image, thr, 255, cv.THRESH_BINARY)[1]
+    num_labels, labels_im, stats, centroids = cv.connectedComponentsWithStats(img)
+    #print (stats.shape)
+
+    #n° stats rows: n° of connected components
+    #5° column stats: number of pixel of that connected component
+    #other stats columns describe the box thar contains each component
+
+    areas = stats[:,4]
+    areas1 = areas.tolist()
+    valuemean = np.mean(areas1)
+    standarddev = np.std(areas1)
+    print ('Total number of connected components:', len(areas1))
+    print ('Average area of connected components:', valuemean)
+    print ('Areas standard deviation:', standarddev)
+
+    bigareasindex = []
+    bigareas = []
+
+    for i in areas1:
+        if i>=(valuemean - (number*standarddev)):
+            bigareasindex.append(areas1.index(i))
+            bigareas.append(i)
+
+    print ('Labels of selected connected components:', bigareasindex)  #index 0 : background
+    print ('Number of pixels of each selected area:', bigareas) 
+    print('')
+
+    bigareasarray = np.array([bigareasindex, bigareas]).T
+    print (bigareasarray)
+    return bigareasindex, bigareas, bigareasarray
+
+
 def newimgbigcomponents(image, bigareasindex, thr=70):    #new array image with only the components having area[pixel]> average area of all components
     img = cv.threshold(image, thr, 255, cv.THRESH_BINARY)[1]
     new= np.zeros_like(img,dtype='int32')
@@ -136,7 +170,10 @@ def FindingLowerEdges(newimg, huenewimg, edges):
                 print ('column', i, 'lower edge at:', colist.index(j), '(not reversed value), right reversed value:', newimg.shape[0]-colist.index(j), ', with label:', j)
                 lowerlimitx.append(newimg.shape[0]-colist.index(j))
                 lowerlimity.append(i)
-                edges[newimg.shape[0]-colist.index(j)][i] = j #reversing again
+                if colist.index(j) == 0 :  #useful if there is a component that ends beyond image limit
+                    edges[newimg.shape[0]-colist.index(j)-1][i] = j   #reversing again 
+                else:
+                    edges[newimg.shape[0]-colist.index(j)][i] = j   #reversing again
             except ValueError:
                 pass
     return edges, lowerlimitx, lowerlimity
