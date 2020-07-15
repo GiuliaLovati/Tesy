@@ -53,13 +53,16 @@ def calcGST(inputIMG, w):
     return coherency, orientation
 
 
-def ApplyDenoisingAndStructureTensor(img_pathname, filterstrenght=20, xin=2600, yin=1700, xstep=2400, ystep=1700, W = 10):  #es: "sharad_data/s_00429402_thm.jpg" or "sharad_data/s_00387302_thm.jpg"
+def ApplyDenoising(img_pathname, filterstrenght=20):  #es: "sharad_data/s_00429402_thm.jpg" or "sharad_data/s_00387302_thm.jpg"
     imgIn_pre = cv.imread(img_pathname, cv.IMREAD_GRAYSCALE)
 
     imgIn = cv.fastNlMeansDenoising(imgIn_pre,None,filterstrenght,7,21)
+    return imgIn
+    
+def ApplyStructureTensor(image, xin=2600, yin=1700, xstep=2400, ystep=1700, W = 10):
     #imgInSquare = imgIn[1600:3600,2900:4900]
     #imgInTiny = imgIn[1700:3400,2600:5000]
-    imgInTiny = imgIn[yin:yin+ystep,xin:xin+xstep]
+    imgInTiny = image[yin:yin+ystep,xin:xin+xstep]
 
     imgCoherency, ori = calcGST(imgInTiny, W)
     #imgCoherencySquare, oriSquare = calcGST(imgInSquare, W)

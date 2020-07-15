@@ -58,7 +58,7 @@ def thresholdvalue(imglist):
         param = norm.fit(imglist[i]) 
         mean = param[0]
         means.append(mean)
-        sd = param[1]
+        sd = param[1]  #variance, not standard deviation (in case sqrt param[1])
         stds.append(sd)
         thr.append(mean +sd)
     return means, stds, thr
