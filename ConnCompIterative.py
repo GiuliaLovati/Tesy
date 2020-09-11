@@ -76,7 +76,7 @@ def iterativeConnComp(imglist):
         huenewimg.append(newimgbigcomponents(imglist[i],index[i], thr[i])[1])
         print ('threshold:', thr[i])
         figure(figsize=(20,10))
-        imshow(newimg[i])
+        imshow(newimg[i]*2+imglist[i])
         plt.pause(0.05)
         dim = input('Selected well? Answer y/n: ')
         while dim == 'n':
@@ -86,10 +86,34 @@ def iterativeConnComp(imglist):
             newimg[i] = newimgbigcomponents(imglist[i], index[i], newthr)[0]
             huenewimg[i] = newimgbigcomponents(imglist[i],index[i], newthr)[1]
             figure(figsize=(20,10))
-            imshow(newimg[i])
+            imshow(newimg[i]*2+imglist[i])
             plt.pause(0.05)
             dim = input('Selected well? Answer y/n: ')
     return newimg , huenewimg
+
+def ComponentSelector(cropped, conncompimg, hueconcomp):  #useful to delate not wanted components
+    finalimages = []
+    for i in range(len(cropped)):
+        components = []
+        finalimg = np.zeros_like(cropped[i], dtype = 'int32')
+        print('\033[1m' + 'IMAGE', i, '\033[1m' + ':') 
+        a=0
+        for j in hueconcomp[i][1:]:
+            #print(j)
+            components.append(np.where((conncompimg[i]==j), int(j), 0))  #, dtype=np.uint8)
+            imshow(components[a]) #+cropped[i])
+            plt.pause(0.05)
+            sel = int(input('if this component is NOT ok, write 0. Otherwise 1 :'))
+            if sel == 0 :
+                components[a]=np.where((components[a]!=0), sel, 0)
+            elif sel ==1 :
+                components[a]=np.where((components[a]!=0), int(j), 0)
+            finalimg += components[a]
+            a+=1
+        finalimages.append(finalimg)
+        imshow(finalimages[i]*5+cropped[i])
+        plt.pause(0.05)
+    return finalimages
 
 
 def iterativeEdges(newimg, huenewimg):  
